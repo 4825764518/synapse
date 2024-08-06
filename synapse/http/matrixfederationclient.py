@@ -680,7 +680,8 @@ class MatrixFederationHttpClient:
                     # if follow_redirects == True or redirect_origin_netloc == url_netloc:
                     #     headers_dict[b"Authorization"] = auth_headers
                         
-                    headers_dict[b"Authorization"] = auth_headers
+                    if url_netloc != "nerdsinspace-matrix-media-repo.s3.us-west-000.backblazeb2.com":
+                        headers_dict[b"Authorization"] = auth_headers
 
                     # logger.debug("follow_redirects {%s} redirect_origin_netloc {%s}, url_netloc {%s}", follow_redirects, redirect_origin_netloc, url_netloc)
 
