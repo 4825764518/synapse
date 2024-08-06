@@ -528,6 +528,7 @@ class MatrixFederationHttpClient:
         backoff_on_404: bool = False,
         backoff_on_all_error_codes: bool = False,
         follow_redirects: bool = False,
+        redirect_origin_netloc: bytes = b"",
     ) -> IResponse:
         """
         Sends a request to the given server.
@@ -654,6 +655,8 @@ class MatrixFederationHttpClient:
                 (b"", b"", path_bytes, None, query_bytes, b"")
             )
 
+            url_netloc = urllib.parse.urlparse(url_str).netloc
+
             while True:
                 try:
                     json = request.get_json()
@@ -672,7 +675,8 @@ class MatrixFederationHttpClient:
                             destination_bytes, method_bytes, url_to_sign_bytes
                         )
 
-                    headers_dict[b"Authorization"] = auth_headers
+                    if follow_redirects == True or redirect_origin_netloc == url_netloc: 
+                        headers_dict[b"Authorization"] = auth_headers
 
                     logger.debug(
                         "{%s} [%s] Sending request: %s %s; timeout %fs",
@@ -751,6 +755,7 @@ class MatrixFederationHttpClient:
                             backoff_on_all_error_codes,
                             # Do not continue following redirects.
                             follow_redirects=False,
+                            redirect_origin_netloc=url_netloc,
                         )
                     else:
                         logger.info(
