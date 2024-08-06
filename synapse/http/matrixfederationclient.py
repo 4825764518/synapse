@@ -528,7 +528,7 @@ class MatrixFederationHttpClient:
         backoff_on_404: bool = False,
         backoff_on_all_error_codes: bool = False,
         follow_redirects: bool = False,
-        redirect_origin_netloc: bytes = b"",
+        redirect_origin_netloc: str = "",
     ) -> IResponse:
         """
         Sends a request to the given server.
@@ -655,7 +655,9 @@ class MatrixFederationHttpClient:
                 (b"", b"", path_bytes, None, query_bytes, b"")
             )
 
+            logger.debug("url_str {%s}", url_str)
             url_netloc = urllib.parse.urlparse(url_str).netloc
+            logger.debug("url_netloc {%s}", url_netloc)
 
             while True:
                 try:
@@ -675,8 +677,12 @@ class MatrixFederationHttpClient:
                             destination_bytes, method_bytes, url_to_sign_bytes
                         )
 
-                    if follow_redirects == True or redirect_origin_netloc == url_netloc: 
+                    if follow_redirects == True or redirect_origin_netloc == url_netloc:
                         headers_dict[b"Authorization"] = auth_headers
+                        
+                    # headers_dict[b"Authorization"] = auth_headers
+
+                    logger.debug("follow_redirects {%s} redirect_origin_netloc {%s}, url_netloc {%s}", follow_redirects, redirect_origin_netloc, url_netloc)
 
                     logger.debug(
                         "{%s} [%s] Sending request: %s %s; timeout %fs",
@@ -744,6 +750,8 @@ class MatrixFederationHttpClient:
                         # The Location header *might* be relative so resolve it.
                         location = response.headers.getRawHeaders(b"Location")[0]
                         new_uri = urllib.parse.urljoin(request.uri, location)
+
+                        logger.debug("following redirect to {%s}", new_uri)
 
                         return await self._send_request(
                             attr.evolve(request, uri=new_uri, generate_uri=False),
