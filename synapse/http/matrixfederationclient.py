@@ -754,7 +754,7 @@ class MatrixFederationHttpClient:
                         location = response.headers.getRawHeaders(b"Location")[0]
                         new_uri = urllib.parse.urljoin(request.uri, location)
 
-                        logger.debug("following redirect to {%s}", new_uri)
+                        logger.debug("following redirect")
 
                         return await self._send_request(
                             attr.evolve(request, uri=new_uri, generate_uri=False),
